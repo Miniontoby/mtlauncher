@@ -2,6 +2,7 @@ import {fetch as tFetch, ResponseType} from '@tauri-apps/api/http';
 import {BaseDirectory, createDir, writeBinaryFile, readDir} from "@tauri-apps/api/fs";
 import { type, arch } from '@tauri-apps/api/os';
 import {invoke} from "@tauri-apps/api/tauri";
+import semverGte from 'semver/functions/gte';
 
 export async function versionExists(version = '5.6.0') {
     try {
@@ -33,6 +34,8 @@ export async function downloadFile(url, targetFile) {
 export async function downloadVersion(version = '5.6.0') {
     console.log('we downloadin babey!!');
     let platform = await type();
+    // They renamed Minetest to Luanti and since version 5.10.0 they renamed the download files as well on the minetest github repo. Linux binaries are fine tho.
+    const downloadName = semverGte(version, '5.10.0') ? 'luanti' : 'minetest';
     switch (platform) {
         case 'Linux':
             await createDir(`versions/${version}`, {
@@ -44,10 +47,10 @@ export async function downloadVersion(version = '5.6.0') {
             await createDir(`versions/${version}`, {
                 dir: BaseDirectory.App,
             });
-            return downloadAndUnzip(`https://github.com/minetest/minetest/releases/download/${version}/minetest-${version}-osx.zip`, `/versions/${version}/minetest.app`);
+            return downloadAndUnzip(`https://github.com/minetest/minetest/releases/download/${version}/${downloadName}-${version}-osx.zip`, `/versions/${version}/minetest.app`);
 
         case 'Windows_NT':
-            return downloadAndUnzip(`https://github.com/minetest/minetest/releases/download/${version}/minetest-${version}-win64.zip`, `/versions/${version}`);
+            return downloadAndUnzip(`https://github.com/minetest/minetest/releases/download/${version}/${downloadName}-${version}-win64.zip`, `/versions/${version}`);
     }
     return false;
 }

@@ -41,7 +41,7 @@ export async function getVersions(forceReload = false) {
         }
 
         versions = versions.data;
-        versions = versions.filter(i => i.tag_name !== '5.4.2-android');
+        versions = versions.filter(i => !i.tag_name.endsWith('-android')); // 5.4.2-android and 5.8.1-android
 
         if ('Darwin' === platform) {
             versions = versions.filter(i => i.assets.filter(j => j.name.includes('-osx')).length);

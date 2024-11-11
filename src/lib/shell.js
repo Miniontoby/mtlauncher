@@ -2,6 +2,7 @@ import { type, arch } from '@tauri-apps/api/os';
 import { appDir } from "@tauri-apps/api/path";
 import { invoke } from '@tauri-apps/api/tauri';
 import { watchDebugLog, stopWatching } from '$lib/file/logger';
+import semverGte from 'semver/functions/gte';
 
 import { writeMergedConfig } from '$lib/file/config';
 
@@ -18,15 +19,17 @@ export async function getBinaryLocation(version) {
         getVersionFolder(version)
     ]);
 
+    // They renamed Minetest to Luanti and since version 5.10.0 they renamed the executable file name as well. Linux seems fine...
+    const executeableName = semverGte(version, '5.10.0') ? 'luanti' : 'minetest';
     switch (platform) {
         case 'Linux':
             return `${baseDir}/minetest.AppImage`;
 
         case 'Darwin':
-            return `${baseDir}/minetest.app`;
+            return `${baseDir}/${executeableName}.app`;
 
         case 'Windows_NT':
-            return `${baseDir}/bin/minetest.exe`;
+            return `${baseDir}/bin/${executeableName}.exe`;
     }
 
     return `${baseDir}/minetest`;
